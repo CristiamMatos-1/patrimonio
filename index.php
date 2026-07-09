@@ -6,7 +6,9 @@
  */
 
 // Define constantes base
-define('BASE_PATH', __DIR__);
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', __DIR__);
+}
 
 $config = require BASE_PATH . '/config/app.php';
 

@@ -30,13 +30,18 @@ if ($encryptionKey === '' && $encryptionKeyFile !== '' && is_file($encryptionKey
     }
 }
 
+$defaultPublicPath = rtrim(str_replace('\\', '/', __DIR__ . '/../public'), '/');
+$publicPath = rtrim($env('APP_PUBLIC_PATH', $defaultPublicPath), '/');
+$uploadDir = rtrim($env('UPLOAD_DIR', $publicPath . '/uploads'), '/');
+
 return [
     'app_name' => $env('APP_NAME', 'Patrimônio'),
     'base_url' => rtrim($env('BASE_URL', ''), '/'),
-    'base_path' => rtrim($env('BASE_PATH', ''), '/'),
+    'base_path' => rtrim($env('APP_BASE_PATH', $env('BASE_PATH', '')), '/'),
     'session_name' => $env('SESSION_NAME', 'patrimonio_session'),
     'timezone' => $env('APP_TIMEZONE', 'America/Sao_Paulo'),
-    'upload_dir' => __DIR__ . '/../public/uploads',
+    'public_path' => $publicPath,
+    'upload_dir' => $uploadDir,
     'upload_base' => '/uploads',
     'db' => [
         'host' => $env('DB_HOST', '127.0.0.1'),

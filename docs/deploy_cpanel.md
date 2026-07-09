@@ -15,36 +15,38 @@ A arquitetura foi projetada para segurança máxima, separando os arquivos de si
 
 1. No Gerenciador de Arquivos do cPanel, vá até a raiz da sua hospedagem (geralmente `/home/seuusuario/`).
 2. Crie uma pasta chamada `patrimonio_app` (FORA do `public_html`).
-3. Faça o upload de todas as pastas do projeto (`app`, `config`, `Core`, `scripts`) para dentro de `patrimonio_app`.
-4. Faça o upload **APENAS** do conteúdo da pasta `public` para dentro do seu diretório público do cPanel (geralmente `public_html` ou um subdomínio).
+3. Faça o upload de todas as pastas do projeto (`app`, `config`, `Core`, `database`, `scripts`) para dentro de `patrimonio_app`.
+4. Faça o upload **APENAS** do conteúdo da pasta `public` para dentro do seu diretório público do cPanel (por exemplo `public_html/patrimonio`).
 
 ---
 
 ## Passo 2: Configuração de Caminhos e `.htaccess`
 
-1. Abra o arquivo `index.php` que você colocou no `public_html`.
-2. Edite apenas o `BASE_PATH` para apontar para a pasta protegida criada no Passo 1.
-3. O `APP_URL` agora é lido de variável de ambiente (`BASE_URL`) e não deve ficar hardcoded no código.
+1. Use o `public/index.php` como arquivo inicial da pasta pública.
+2. Defina a variável de ambiente `APP_SOURCE_PATH` apontando para a pasta protegida criada no Passo 1, por exemplo `/home/seuusuario/patrimonio_app`.
+3. Se a aplicação estiver em `https://coninfoms.com.br/patrimonio`, defina também `BASE_URL` com esse endereço e `APP_BASE_PATH` com `/patrimonio`.
 
-3. Verifique se o arquivo `.htaccess` foi enviado corretamente para o `public_html` ou para a subpasta pública da aplicação. Ele é responsável pelas URLs amigáveis:
+4. Verifique se o arquivo `.htaccess` da pasta `public` foi enviado corretamente para `public_html/patrimonio`. Ele é responsável pelas URLs amigáveis:
 ```apache
 DirectoryIndex index.php
 RewriteEngine On
 
 # Se a aplicação estiver em subpasta, ajuste a base:
-# RewriteBase /aptrimonio/
+# RewriteBase /patrimonio/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php?url=$0 [QSA,L]
 ```
 
-4. Se aparecer `Server unable to read htaccess file, denying access to be safe`, o problema é de publicação/permissão no Apache, antes do PHP executar. No cPanel, confirme:
+5. Se aparecer `Server unable to read htaccess file, denying access to be safe`, o problema é de publicação/permissão no Apache, antes do PHP executar. No cPanel, confirme:
    - `.htaccess` com permissão `644`;
-   - pastas públicas (`public_html` ou `public_html/aptrimonio`) com permissão `755`;
+   - pastas públicas (`public_html` e `public_html/patrimonio`) com permissão `755`;
    - `index.php` com permissão `644`;
    - que não existe outro `.htaccess` corrompido ou vazio em uma pasta pai;
    - que o `mod_rewrite` está habilitado e `AllowOverride` permite ler `.htaccess`.
+
+6. Se você publicar o repositório inteiro diretamente em `public_html/patrimonio`, use o `index.php` e o `.htaccess` da raiz do projeto. Se publicar apenas a pasta `public`, use os arquivos dentro de `public/`.
 
 ---
 
@@ -74,7 +76,10 @@ Configure no cPanel (Apache Environment Variables, `.htaccess` privado do servid
 
 ```apache
 SetEnv ENCRYPTION_KEY "cole_aqui_o_valor_gerado"
-SetEnv BASE_URL "https://seusistema.com.br"
+SetEnv BASE_URL "https://coninfoms.com.br/patrimonio"
+SetEnv APP_BASE_PATH "/patrimonio"
+SetEnv APP_SOURCE_PATH "/home/seuusuario/patrimonio_app"
+SetEnv APP_PUBLIC_PATH "/home/seuusuario/public_html/patrimonio"
 ```
 
 Opcionalmente, para não expor segredo em variável direta, você pode usar arquivo seguro fora do `public_html`:
@@ -84,6 +89,7 @@ SetEnv ENCRYPTION_KEY_FILE "/home/seuusuario/.secrets/patrimonio_encryption_key"
 ```
 
 > A aplicação bloqueia a inicialização quando `ENCRYPTION_KEY` está ausente ou fraca.
+> Em deploy com pasta pública separada, `APP_PUBLIC_PATH` garante que uploads e arquivos públicos sejam gravados no diretório web correto.
 
 ---
 

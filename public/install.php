@@ -5,7 +5,46 @@ declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-$config = require __DIR__ . '/../app/bootstrap.php';
+function resolveBasePath(string $publicDir): string
+{
+    $appFolderName = basename($publicDir) . '_app';
+    $candidates = [];
+
+    foreach (['APP_SOURCE_PATH', 'PROJECT_ROOT', 'PATRIMONIO_APP_PATH'] as $key) {
+        $value = getenv($key);
+        if (is_string($value) && trim($value) !== '') {
+            $candidates[] = trim($value);
+        }
+    }
+
+    $parentDir = dirname($publicDir);
+    $homeDir = dirname($parentDir);
+
+    $candidates[] = dirname($publicDir);
+    $candidates[] = $parentDir . DIRECTORY_SEPARATOR . $appFolderName;
+    $candidates[] = $homeDir . DIRECTORY_SEPARATOR . $appFolderName;
+
+    foreach ($candidates as $candidate) {
+        $normalized = rtrim(str_replace('\\', '/', $candidate), '/');
+        if ($normalized === '') {
+            continue;
+        }
+
+        if (is_file($normalized . '/config/app.php') && is_dir($normalized . '/app') && is_dir($normalized . '/database')) {
+            return $normalized;
+        }
+    }
+
+    http_response_code(500);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Não foi possível localizar a pasta protegida da aplicação.\n";
+    echo "Defina APP_SOURCE_PATH apontando para o diretório que contém app/, config/ e database/.\n";
+    exit;
+}
+
+define('BASE_PATH', resolveBasePath(__DIR__));
+
+$config = require BASE_PATH . '/app/bootstrap.php';
 
 use App\Lib\Db;
 
@@ -56,7 +95,7 @@ header('Content-Type: text/plain; charset=utf-8');
 
 $pdo = Db::pdo($config);
 
-$schema = (string) file_get_contents(__DIR__ . '/../database/schema.sql');
+$schema = (string) file_get_contents(BASE_PATH . '/database/schema.sql');
 if ($schema === '') {
     http_response_code(500);
     echo 'Schema vazio';
