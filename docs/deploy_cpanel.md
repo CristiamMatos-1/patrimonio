@@ -26,13 +26,25 @@ A arquitetura foi projetada para segurança máxima, separando os arquivos de si
 2. Edite apenas o `BASE_PATH` para apontar para a pasta protegida criada no Passo 1.
 3. O `APP_URL` agora é lido de variável de ambiente (`BASE_URL`) e não deve ficar hardcoded no código.
 
-3. Verifique se o arquivo `.htaccess` foi enviado corretamente para o `public_html`. Ele é responsável pelas URLs amigáveis:
+3. Verifique se o arquivo `.htaccess` foi enviado corretamente para o `public_html` ou para a subpasta pública da aplicação. Ele é responsável pelas URLs amigáveis:
 ```apache
+DirectoryIndex index.php
 RewriteEngine On
+
+# Se a aplicação estiver em subpasta, ajuste a base:
+# RewriteBase /aptrimonio/
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+RewriteRule ^ index.php?url=$0 [QSA,L]
 ```
+
+4. Se aparecer `Server unable to read htaccess file, denying access to be safe`, o problema é de publicação/permissão no Apache, antes do PHP executar. No cPanel, confirme:
+   - `.htaccess` com permissão `644`;
+   - pastas públicas (`public_html` ou `public_html/aptrimonio`) com permissão `755`;
+   - `index.php` com permissão `644`;
+   - que não existe outro `.htaccess` corrompido ou vazio em uma pasta pai;
+   - que o `mod_rewrite` está habilitado e `AllowOverride` permite ler `.htaccess`.
 
 ---
 
@@ -103,6 +115,15 @@ Após substituir esses arquivos, execute novamente a importação de `scripts/02
 Se o banco master já existe em produção, execute também:
 
 - `database/upgrade_2026_07_09_tenants_blocked_status.sql` (habilita status `blocked` para bloqueio total pelo superadmin).
+
+> **Importante:** baixe o arquivo `.sql` bruto do repositório. Se o conteúdo começar com `<!DOCTYPE html>`, você salvou a página HTML do GitHub em vez do script SQL.
+
+Conteúdo esperado do upgrade:
+
+```sql
+ALTER TABLE tenants
+    MODIFY COLUMN status ENUM('active', 'suspended', 'blocked') DEFAULT 'active';
+```
 
 ---
 
