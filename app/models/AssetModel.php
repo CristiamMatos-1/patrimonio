@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Core\Model;
 use PDO;
+use PDOException;
 
 class AssetModel extends Model
 {
@@ -133,7 +134,10 @@ class AssetModel extends Model
         try {
             $stmt = $this->db->query("SELECT COUNT(*) FROM assets");
             $count = (int) $stmt->fetchColumn();
-        } catch (\Throwable $e) {
+        } catch (PDOException $e) {
+            if ($e->getCode() !== '42S02') {
+                throw $e;
+            }
             $count = 0;
         }
 

@@ -15,10 +15,11 @@ class AuthController extends Controller
 
     public function authenticate()
     {
-        $document = preg_replace('/[^0-9]/', '', $_POST['document'] ?? '');
+        $identifier = trim((string) ($_POST['document'] ?? ''));
+        $document = preg_replace('/[^0-9]/', '', $identifier);
         $password = $_POST['password'] ?? '';
 
-        if (empty($document) || empty($password)) {
+        if (($identifier === '' && $document === '') || empty($password)) {
             return $this->render('auth/login', [
                 'title' => 'Login - SaaS Patrimonial',
                 'error' => 'Por favor, preencha todos os campos.'
@@ -31,10 +32,16 @@ class AuthController extends Controller
             $dbInstance->switchToMaster();
             $pdo = $dbInstance->getConnection();
 
-            // -- NOVO: Verifica se é Superadmin (Login Unificado) --
-            // Usamos o 'document' pois inserimos o CPF 99999999999 no campo email da tabela super_admins
-            $stmtSuper = $pdo->prepare("SELECT id, email, password_hash FROM super_admins WHERE email = :email LIMIT 1");
-            $stmtSuper->execute(['email' => $document]);
+            $stmtSuper = $pdo->prepare(
+                "SELECT id, email, password_hash
+                 FROM super_admins
+                 WHERE email = :identifier OR email = :document
+                 LIMIT 1"
+            );
+            $stmtSuper->execute([
+                ':identifier' => $identifier,
+                ':document' => $document,
+            ]);
             $superadmin = $stmtSuper->fetch(\PDO::FETCH_ASSOC);
 
             if ($superadmin && password_verify($password, $superadmin['password_hash'])) {
@@ -42,19 +49,36 @@ class AuthController extends Controller
                 $_SESSION['superadmin_id'] = $superadmin['id'];
                 $_SESSION['superadmin_email'] = $superadmin['email'];
 
-                $this->redirect('/superadmin/tenant/create');
+                $this->redirect('/superadmin/tenants');
                 return;
             }
-            // -- FIM DA VERIFICAÇÃO SUPERADMIN --
+
+            if ($document === '') {
+                return $this->render('auth/login', [
+                    'title' => 'Login - SaaS Patrimonial',
+                    'error' => 'Para acesso de cliente, informe um CPF ou CNPJ válido.'
+                ]);
+            }
 
             // 2. Consulta o roteamento para Tenants/Funcionários
             $routingModel = new \App\Models\RoutingModel();
-            $tenantData = $routingModel->getTenantCredentialsByDocument($document);
+            $tenantData = $routingModel->getTenantByDocument($document);
 
             if (!$tenantData) {
                 return $this->render('auth/login', [
                     'title' => 'Login - SaaS Patrimonial',
-                    'error' => 'Acesso negado. Documento não encontrado ou conta suspensa.'
+                    'error' => 'Acesso negado. Documento não encontrado.'
+                ]);
+            }
+
+            if ($tenantData['status'] !== 'active') {
+                $statusMessage = $tenantData['status'] === 'blocked'
+                    ? 'Conta bloqueada pelo superadmin.'
+                    : 'Conta suspensa pelo superadmin.';
+
+                return $this->render('auth/login', [
+                    'title' => 'Login - SaaS Patrimonial',
+                    'error' => $statusMessage
                 ]);
             }
 
@@ -99,9 +123,10 @@ class AuthController extends Controller
             }
 
         } catch (\Exception $e) {
+            error_log('Erro no login de usuário: ' . $e->getMessage());
             return $this->render('auth/login', [
                 'title' => 'Login - SaaS Patrimonial',
-                'error' => 'Erro interno: ' . $e->getMessage()
+                'error' => 'Erro interno. Tente novamente.'
             ]);
         }
     }

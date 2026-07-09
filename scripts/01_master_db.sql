@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     db_name VARCHAR(255) NOT NULL,
     db_user VARCHAR(255) NOT NULL,
     db_pass TEXT NOT NULL, -- Senha criptografada do BD do Tenant
-    status ENUM('active', 'suspended') DEFAULT 'active',
+    status ENUM('active', 'suspended', 'blocked') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -40,7 +40,9 @@ CREATE TABLE IF NOT EXISTS super_admins (
 
 -- 1. Super Admin
 INSERT INTO super_admins (email, password_hash) 
-VALUES ('admin@saas.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'); -- Senha: password
+VALUES ('cristiammatos@icloud.com', '$2y$12$NKeCmEp.wwUWrF1X.pFtfOILyw1Z6y0PF.nc1QHebRe1L36tliQnC')
+ON DUPLICATE KEY UPDATE
+    password_hash = VALUES(password_hash);
 
 -- 2. Inserindo um Tenant Fictício para testes
 -- Nota: db_pass está criptografado (simulação para testes, na prática será gerado via PHP)

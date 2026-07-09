@@ -1,7 +1,6 @@
--- Script para inserir o Superadmin desejado no banco master
--- Usuário: 99999999999
--- Senha:  99999999999
-
--- O Hash abaixo foi gerado usando password_hash('99999999999', PASSWORD_DEFAULT)
-INSERT INTO super_admins (email, password_hash) 
-VALUES ('99999999999', '$2y$10$tZ2R8B7K1xVb3J3kO9qL3.3T0n4W7o5G/A7V4gV9/5Z1z2/9K2D4e');
+-- Script para criar/atualizar o superadmin no banco master.
+-- Hash gerado com password_hash(PASSWORD_DEFAULT).
+INSERT INTO super_admins (email, password_hash)
+VALUES ('cristiammatos@icloud.com', '$2y$12$NKeCmEp.wwUWrF1X.pFtfOILyw1Z6y0PF.nc1QHebRe1L36tliQnC')
+ON DUPLICATE KEY UPDATE
+    password_hash = VALUES(password_hash);

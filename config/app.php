@@ -21,6 +21,15 @@ $env = static function (string $key, string $default = ''): string {
     return $default;
 };
 
+$encryptionKey = trim($env('ENCRYPTION_KEY', ''));
+$encryptionKeyFile = trim($env('ENCRYPTION_KEY_FILE', ''));
+if ($encryptionKey === '' && $encryptionKeyFile !== '' && is_file($encryptionKeyFile)) {
+    $fileValue = file_get_contents($encryptionKeyFile);
+    if (is_string($fileValue)) {
+        $encryptionKey = trim($fileValue);
+    }
+}
+
 return [
     'app_name' => $env('APP_NAME', 'Patrimônio'),
     'base_url' => rtrim($env('BASE_URL', ''), '/'),
@@ -47,6 +56,6 @@ return [
     ],
     'security' => [
         'install_token' => $env('INSTALL_TOKEN', ''),
-        'encryption_key' => $env('ENCRYPTION_KEY', 'troque_por_uma_chave_segura_de_32_caracteres_no_cpanel!'),
+        'encryption_key' => $encryptionKey,
     ],
 ];

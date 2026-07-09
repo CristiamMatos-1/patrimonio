@@ -3,7 +3,7 @@
 <div class="max-w-md mx-auto surface rounded-lg p-8 mt-10">
     <h2 class="text-2xl font-bold mb-2 text-center">Acesse sua conta</h2>
     <p class="text-sm text-gray-500 text-center mb-6">
-        Digite seu CPF (Funcionário/Gestor) ou CNPJ (Administrador)
+        CPF/CNPJ para clientes ou e-mail/CNPJ para superadmin
     </p>
 
     <?php if (!empty($error)): ?>
@@ -14,11 +14,11 @@
 
     <form action="<?= APP_URL ?>/login" method="POST" class="space-y-5">
         <div>
-            <label for="document" class="block text-sm font-semibold mb-1 text-gray-700">CPF ou CNPJ</label>
+            <label for="document" class="block text-sm font-semibold mb-1 text-gray-700">Documento ou e-mail</label>
             <!-- Inputs grandes (mobile-friendly / idosos) -->
             <input type="text" id="document" name="document" required 
                    class="w-full px-4 py-3 rounded border border-gray-300 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 outline-none transition-colors"
-                   placeholder="Apenas números">
+                   placeholder="CPF, CNPJ ou e-mail">
         </div>
 
         <div>

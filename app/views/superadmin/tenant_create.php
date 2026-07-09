@@ -1,7 +1,12 @@
 <?php ob_start(); ?>
 
 <div class="max-w-2xl mx-auto surface rounded-lg p-8 mt-10">
-    <h2 class="text-2xl font-bold mb-6 border-b pb-4">Provisionar Novo Cliente (Tenant)</h2>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b pb-4 mb-6">
+        <h2 class="text-2xl font-bold">Provisionar Novo Cliente (Tenant)</h2>
+        <a href="<?= APP_URL ?>/superadmin/tenants" class="text-sm font-semibold text-blue-600 hover:underline">
+            Ver clientes cadastrados
+        </a>
+    </div>
 
     <?php if (!empty($success)): ?>
         <div class="bg-green-50 text-green-700 p-4 rounded mb-6 text-sm font-medium border border-green-200">
@@ -16,6 +21,7 @@
     <?php endif; ?>
 
     <form action="<?= APP_URL ?>/superadmin/tenant" method="POST" class="space-y-5">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Lib\Csrf::token()) ?>">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
