@@ -1,0 +1,12 @@
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Exemplo para publicação em subpasta:
+    # RewriteBase /patrimonio/
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php?url=$0 [QSA,L]
+</IfModule>
