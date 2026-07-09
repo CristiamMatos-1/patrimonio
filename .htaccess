@@ -4,7 +4,7 @@ DirectoryIndex index.php
     RewriteEngine On
 
     # Se o sistema estiver publicado em uma subpasta, ajuste a RewriteBase.
-    # Exemplo: RewriteBase /aptrimonio/
+    # Exemplo: RewriteBase /patrimonio/
     # RewriteBase /
 
     RewriteCond %{REQUEST_FILENAME} !-f
