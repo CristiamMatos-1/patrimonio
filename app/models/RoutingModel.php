@@ -7,12 +7,8 @@ use PDO;
 
 class RoutingModel extends Model
 {
-    /**
-     * Busca as credenciais do banco de dados do Tenant com base no documento (CPF/CNPJ)
-     */
-    public function getTenantCredentialsByDocument(string $document): ?array
+    public function getTenantByDocument(string $document): ?array
     {
-        // Limpa formatação do documento
         $document = preg_replace('/[^0-9]/', '', $document);
 
         $sql = "
@@ -28,6 +24,15 @@ class RoutingModel extends Model
         $stmt->execute();
 
         $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
+    /**
+     * Busca as credenciais do banco de dados do Tenant com base no documento (CPF/CNPJ)
+     */
+    public function getTenantCredentialsByDocument(string $document): ?array
+    {
+        $result = $this->getTenantByDocument($document);
 
         if ($result && $result['status'] === 'active') {
             return $result;

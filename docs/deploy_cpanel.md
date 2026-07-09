@@ -23,15 +23,8 @@ A arquitetura foi projetada para segurança máxima, separando os arquivos de si
 ## Passo 2: Configuração de Caminhos e `.htaccess`
 
 1. Abra o arquivo `index.php` que você colocou no `public_html`.
-2. Edite as definições de caminho para apontarem para a pasta protegida que você criou no Passo 1:
-
-```php
-// Altere dirname(__DIR__) para o caminho absoluto da pasta protegida
-define('BASE_PATH', '/home/seuusuario/patrimonio_app');
-
-// Altere para o domínio real
-define('APP_URL', 'https://seusistema.com.br'); 
-```
+2. Edite apenas o `BASE_PATH` para apontar para a pasta protegida criada no Passo 1.
+3. O `APP_URL` agora é lido de variável de ambiente (`BASE_URL`) e não deve ficar hardcoded no código.
 
 3. Verifique se o arquivo `.htaccess` foi enviado corretamente para o `public_html`. Ele é responsável pelas URLs amigáveis:
 ```apache
@@ -57,22 +50,28 @@ O sistema utiliza a abordagem Multi-Tenant *Database per Tenant*. O banco master
 
 ## Passo 4: Configuração de Segurança (Chave de Criptografia)
 
-Abra o arquivo `patrimonio_app/config/database.php` e configure o acesso ao Master e a chave de segurança:
+Defina uma chave forte para `ENCRYPTION_KEY` no ambiente do cPanel.
 
-```php
-return [
-    'master' => [
-        'host' => 'localhost',
-        'dbname' => 'seuusuario_patrimonio_master',
-        'user' => 'seuusuario_master',
-        'password' => 'senha_forte_do_master',
-        'charset' => 'utf8mb4'
-    ],
-    // ATENÇÃO: Esta chave criptografa as senhas dos bancos dos clientes!
-    // Gere uma string aleatória de 32 caracteres e nunca a perca.
-    'encryption_key' => 'SUA_CHAVE_SECRETA_MUITO_FORTE_AQUI'
-];
+Gere uma chave forte:
+
+```bash
+openssl rand -hex 32
 ```
+
+Configure no cPanel (Apache Environment Variables, `.htaccess` privado do servidor ou equivalente):
+
+```apache
+SetEnv ENCRYPTION_KEY "cole_aqui_o_valor_gerado"
+SetEnv BASE_URL "https://seusistema.com.br"
+```
+
+Opcionalmente, para não expor segredo em variável direta, você pode usar arquivo seguro fora do `public_html`:
+
+```apache
+SetEnv ENCRYPTION_KEY_FILE "/home/seuusuario/.secrets/patrimonio_encryption_key"
+```
+
+> A aplicação bloqueia a inicialização quando `ENCRYPTION_KEY` está ausente ou fraca.
 
 ---
 
@@ -100,6 +99,10 @@ Se você já tem uma instalação anterior deste sistema, substitua os seguintes
 - `app/views/tenant/assets/index.php` e `app/views/tenant/assets/view.php`: exibe QR Code do patrimônio e fornece acesso rápido ao ciclo de empréstimos.
 
 Após substituir esses arquivos, execute novamente a importação de `scripts/02_tenant_db.sql` no banco do tenant para criar as tabelas de inventário se ainda não existirem.
+
+Se o banco master já existe em produção, execute também:
+
+- `database/upgrade_2026_07_09_tenants_blocked_status.sql` (habilita status `blocked` para bloqueio total pelo superadmin).
 
 ---
 

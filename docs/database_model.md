@@ -14,7 +14,7 @@ CREATE TABLE tenants (
     db_name VARCHAR(255) NOT NULL,
     db_user VARCHAR(255) NOT NULL,
     db_pass VARCHAR(255) NOT NULL, -- Deve ser armazenado fortemente criptografado (ex: OpenSSL AES-256-CBC)
-    status ENUM('active', 'suspended') DEFAULT 'active',
+    status ENUM('active', 'suspended', 'blocked') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

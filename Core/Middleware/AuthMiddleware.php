@@ -49,7 +49,10 @@ class AuthMiddleware
             );
 
         } catch (Exception $e) {
-            die("Erro de Autenticação/Roteamento: " . $e->getMessage());
+            error_log('Erro de autenticação/roteamento: ' . $e->getMessage());
+            session_destroy();
+            header("Location: " . APP_URL . "/login?error=Falha_de_autenticacao");
+            exit;
         }
     }
 }

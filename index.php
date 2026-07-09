@@ -5,16 +5,44 @@
  * Todas as requisições passam por aqui.
  */
 
-// Habilita a exibição de erros temporariamente para debug da tela branca
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-session_start();
-
 // Define constantes base
 define('BASE_PATH', __DIR__);
-define('APP_URL', 'https://coninfoms.com.br/patrimonio'); // Ajustado para o seu servidor
+
+$config = require BASE_PATH . '/config/app.php';
+
+$encryptionKey = trim((string) ($config['security']['encryption_key'] ?? ''));
+if (strlen($encryptionKey) < 32) {
+    error_log('Configuração inválida: ENCRYPTION_KEY não definida ou fraca.');
+    http_response_code(500);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo 'Erro de configuração do ambiente.';
+    exit;
+}
+
+$baseUrl = rtrim((string) ($config['base_url'] ?? ''), '/');
+if ($baseUrl === '') {
+    $isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $scriptDir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+    $scriptDir = $scriptDir === '/' ? '' : rtrim($scriptDir, '/');
+    $baseUrl = $scheme . '://' . $host . $scriptDir;
+}
+define('APP_URL', $baseUrl);
+
+$timezone = (string) ($config['timezone'] ?? 'America/Sao_Paulo');
+if ($timezone === '') {
+    $timezone = 'America/Sao_Paulo';
+}
+date_default_timezone_set($timezone);
+
+$sessionName = (string) ($config['session_name'] ?? 'patrimonio_session');
+if ($sessionName !== '') {
+    session_name($sessionName);
+}
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Inclui o Autoloader nativo
 require_once BASE_PATH . '/Core/Autoloader.php';
@@ -37,8 +65,11 @@ $router->add('POST', '/login', 'AuthController@authenticate');
 $router->add('GET', '/superadmin/login', 'Superadmin\AuthController@loginForm');
 $router->add('POST', '/superadmin/login', 'Superadmin\AuthController@authenticate');
 $router->add('GET', '/superadmin/logout', 'Superadmin\AuthController@logout');
+$router->add('GET', '/superadmin/tenants', 'Superadmin\TenantController@index');
 $router->add('GET', '/superadmin/tenant/create', 'Superadmin\TenantController@create');
 $router->add('POST', '/superadmin/tenant', 'Superadmin\TenantController@store');
+$router->add('POST', '/superadmin/tenants/status', 'Superadmin\TenantController@updateStatus');
+$router->add('POST', '/superadmin/tenants/reset-admin-password', 'Superadmin\TenantController@resetAdminPassword');
 
 // Rotas do Tenant (Requer Login)
 $router->add('GET', '/dashboard', 'Tenant\DashboardController@index');

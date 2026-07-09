@@ -19,7 +19,7 @@ class AuthController extends Controller
 
         // Se já estiver logado, redireciona para a área de criação de tenant ou dashboard
         if (!empty($_SESSION['superadmin_logged_in']) && $_SESSION['superadmin_logged_in'] === true) {
-            header("Location: " . APP_URL . "/superadmin/tenant/create");
+            header("Location: " . APP_URL . "/superadmin/tenants");
             exit;
         }
 
@@ -62,7 +62,7 @@ class AuthController extends Controller
                 $_SESSION['superadmin_id'] = $superadmin['id'];
                 $_SESSION['superadmin_email'] = $superadmin['email'];
 
-                header("Location: " . APP_URL . "/superadmin/tenant/create");
+                header("Location: " . APP_URL . "/superadmin/tenants");
                 exit;
             } else {
                 $this->render('superadmin/login', [
@@ -71,9 +71,10 @@ class AuthController extends Controller
                 ]);
             }
         } catch (Exception $e) {
+            error_log('Erro no login de superadmin: ' . $e->getMessage());
             $this->render('superadmin/login', [
                 'title' => 'Superadmin Login',
-                'error' => 'Erro interno do servidor: ' . $e->getMessage()
+                'error' => 'Erro interno do servidor. Tente novamente.'
             ]);
         }
     }

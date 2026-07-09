@@ -55,8 +55,8 @@ class Database
                     PDO::ATTR_EMULATE_PREPARES => false,
                 ]);
             } catch (PDOException $e) {
-                // Em produção, deve logar o erro e não exibir detalhes na tela
-                die("Erro de conexão com o banco master.");
+                error_log('Falha de conexão com banco master: ' . $e->getMessage());
+                throw new Exception('Erro de conexão com o banco master.');
             }
         }
         
@@ -81,7 +81,8 @@ class Database
             $this->activeConnection = 'tenant';
             return $this->tenantConnection;
         } catch (PDOException $e) {
-            die("Erro de conexão com o banco do cliente: " . $e->getMessage());
+            error_log('Falha de conexão com banco do tenant: ' . $e->getMessage());
+            throw new Exception('Erro de conexão com o banco do cliente.');
         }
     }
 
