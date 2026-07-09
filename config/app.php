@@ -46,17 +46,17 @@ return [
     'db' => [
         'host' => $env('DB_HOST', '127.0.0.1'),
         'port' => $env('DB_PORT', '3306'),
-        'name' => $env('DB_NAME', 'patrimonio'),
-        'user' => $env('DB_USER', 'root'),
-        'pass' => $env('DB_PASS', ''),
+        'name' => $env('DB_NAME', 'coninfom_patrimonio'),
+        'user' => $env('DB_USER', 'coninfom_admin'),
+        'pass' => $env('DB_PASS', 'SenhaConinfoms2026'),
         'charset' => 'utf8mb4',
     ],
     'db_master' => [
         'host' => $env('DB_MASTER_HOST', 'localhost'),
         'port' => $env('DB_MASTER_PORT', '3306'),
-        'name' => $env('DB_MASTER_NAME', 'patrimonio_master'),
-        'user' => $env('DB_MASTER_USER', 'root'),
-        'pass' => $env('DB_MASTER_PASS', ''),
+        'name' => $env('DB_MASTER_NAME', 'coninfom_patrimonio'),
+        'user' => $env('DB_MASTER_USER', 'coninfom_admin'),
+        'pass' => $env('DB_MASTER_PASS', 'SenhaConinfoms2026'),
         'charset' => 'utf8mb4',
     ],
     'security' => [
