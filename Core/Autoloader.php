@@ -111,6 +111,19 @@ class Autoloader
             $pathUcfirst = !empty($ucfirstDirs) ? implode('/', $ucfirstDirs) . '/' : '';
             $fileUcfirst = $baseDir . $pathUcfirst . $className . '.php';
             if ($this->requireFile($fileUcfirst)) return $fileUcfirst;
+
+            // 4. Primeiro diretório minúsculo e subdiretórios em ucfirst
+            if (count($lowerDirs) > 1) {
+                $mixedDirs = $lowerDirs;
+                foreach ($mixedDirs as $index => $dir) {
+                    if ($index > 0) {
+                        $mixedDirs[$index] = ucfirst($dir);
+                    }
+                }
+                $pathMixed = implode('/', $mixedDirs) . '/';
+                $fileMixed = $baseDir . $pathMixed . $className . '.php';
+                if ($this->requireFile($fileMixed)) return $fileMixed;
+            }
         }
 
         return false;
@@ -151,6 +164,20 @@ class Autoloader
                 $fileUcfirst = $baseDir . $pathUcfirst . $className . '.php';
                 if ($this->requireFile($fileUcfirst)) {
                     return $fileUcfirst;
+                }
+
+                if (count($lowerDirs) > 1) {
+                    $mixedDirs = $lowerDirs;
+                    foreach ($mixedDirs as $index => $dir) {
+                        if ($index > 0) {
+                            $mixedDirs[$index] = ucfirst($dir);
+                        }
+                    }
+                    $pathMixed = implode('/', $mixedDirs) . '/';
+                    $fileMixed = $baseDir . $pathMixed . $className . '.php';
+                    if ($this->requireFile($fileMixed)) {
+                        return $fileMixed;
+                    }
                 }
             }
             // --- FIM DO FALLBACK ---
