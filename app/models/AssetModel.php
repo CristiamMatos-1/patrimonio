@@ -171,9 +171,35 @@ class AssetModel extends Model
     }
 
     /**
-     * Cadastra um novo bem patrimonial.
+     * Retorna patrimônios pelos IDs informados.
+     *
+     * @param int[] $ids
      */
-    public function create(array $data): bool
+    public function findByIds(array $ids): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids), fn ($id) => $id > 0));
+        if (empty($ids)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT a.*, b.name as branch_name
+                FROM assets a
+                INNER JOIN branches b ON a.branch_id = b.id
+                WHERE a.id IN ($placeholders)
+                ORDER BY a.asset_number ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($ids);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Cadastra um novo bem patrimonial.
+     *
+     * @return int|false ID do registro inserido, ou false em caso de falha.
+     */
+    public function create(array $data): int|false
     {
         // Se não vier um número de tombamento (deve ser automático), nós geramos um
         if (empty($data['asset_number'])) {
@@ -224,10 +250,11 @@ class AssetModel extends Model
         ]);
 
         if ($success) {
-            $recordId = $this->db->lastInsertId();
+            $recordId = (int) $this->db->lastInsertId();
             \Core\Services\AuditService::log('CREATE', 'assets', $recordId, null, $data);
+            return $recordId;
         }
 
-        return $success;
+        return false;
     }
 }

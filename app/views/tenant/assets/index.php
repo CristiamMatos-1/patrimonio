@@ -5,6 +5,7 @@
         <h2 class="text-2xl font-bold">Gestão Patrimonial</h2>
         <div class="flex flex-wrap gap-2">
             <a href="<?= APP_URL ?>/assets/pdf" class="inline-flex items-center justify-center rounded bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition">Exportar PDF</a>
+            <a href="<?= APP_URL ?>/assets/labels" class="inline-flex items-center justify-center rounded bg-white border border-slate-300 text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition">🏷️ Etiquetas</a>
             <a href="<?= APP_URL ?>/assets/scan" class="inline-flex items-center justify-center rounded bg-white border border-slate-300 text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition">Buscar por QR</a>
         </div>
     </div>

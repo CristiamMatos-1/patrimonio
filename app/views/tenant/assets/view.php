@@ -8,6 +8,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="<?= APP_URL ?>/assets" class="text-blue-600 font-semibold hover:underline">&larr; Voltar à lista</a>
+            <a href="<?= APP_URL ?>/assets/label-print?ids=<?= (int) $asset['id'] ?>" target="_blank" class="inline-flex items-center rounded bg-white border border-slate-300 text-slate-900 px-4 py-2 hover:bg-slate-50 transition">🏷️ Etiqueta</a>
             <a href="<?= APP_URL ?>/assets/edit?id=<?= (int) $asset['id'] ?>" class="bg-slate-900 text-white px-4 py-2 rounded hover:bg-slate-800 transition">Editar</a>
         </div>
     </div>

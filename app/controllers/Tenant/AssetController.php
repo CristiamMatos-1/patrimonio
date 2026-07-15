@@ -158,9 +158,13 @@ class AssetController extends Controller
         $_POST['qr_code_hash'] = $uniqueHash;
 
         $assetModel = new AssetModel();
-        $assetModel->create($_POST);
-        
-        $this->redirect('/assets');
+        $newId = $assetModel->create($_POST);
+
+        if ($newId) {
+            $this->redirect('/assets/labels?ids=' . $newId);
+        } else {
+            $this->redirect('/assets');
+        }
     }
 
     public function view()
@@ -246,6 +250,59 @@ class AssetController extends Controller
         AuditService::log('UPDATE', 'assets', $id, $before, $_POST);
 
         $this->redirect('/assets/view?id=' . $id);
+    }
+
+    public function labels(): void
+    {
+        $assetModel = new AssetModel();
+        $allAssets  = $assetModel->getAll();
+
+        $preSelectedIds = [];
+        if (!empty($_GET['ids'])) {
+            foreach (explode(',', (string) $_GET['ids']) as $raw) {
+                $id = (int) trim($raw);
+                if ($id > 0) {
+                    $preSelectedIds[] = $id;
+                }
+            }
+        }
+
+        $this->render('tenant/assets/labels', [
+            'title'          => 'Imprimir Etiquetas',
+            'assets'         => $allAssets,
+            'preSelectedIds' => $preSelectedIds,
+        ]);
+    }
+
+    public function labelPrint(): void
+    {
+        $ids = [];
+        if (!empty($_GET['ids'])) {
+            foreach (explode(',', (string) $_GET['ids']) as $raw) {
+                $id = (int) trim($raw);
+                if ($id > 0) {
+                    $ids[] = $id;
+                }
+            }
+        }
+
+        if (empty($ids)) {
+            $this->redirect('/assets/labels');
+            return;
+        }
+
+        $assetModel = new AssetModel();
+        $assets     = $assetModel->findByIds($ids);
+
+        if (empty($assets)) {
+            $this->redirect('/assets/labels');
+            return;
+        }
+
+        // Standalone print page — no layout wrapper
+        $this->render('tenant/assets/label_print', [
+            'assets' => $assets,
+        ]);
     }
 
     public function loan()
