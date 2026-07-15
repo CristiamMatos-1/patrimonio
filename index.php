@@ -102,6 +102,8 @@ $router->add('GET', '/assets/pdf', 'Tenant\AssetController@pdf');
 $router->add('GET', '/assets/edit', 'Tenant\AssetController@edit');
 $router->add('POST', '/assets/update', 'Tenant\AssetController@update');
 $router->add('POST', '/assets/loan', 'Tenant\AssetController@loan');
+$router->add('GET', '/assets/labels', 'Tenant\AssetController@labels');
+$router->add('GET', '/assets/label-print', 'Tenant\AssetController@labelPrint');
 
 // Rotas de Inventário / Auditoria
 $router->add('GET', '/inventory', 'Tenant\InventoryController@index');
